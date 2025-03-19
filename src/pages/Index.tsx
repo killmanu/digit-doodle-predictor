@@ -10,12 +10,13 @@ import { PenLine, Upload } from 'lucide-react';
 import { toast } from 'sonner';
 
 enum InputMode {
+  NONE = 'none',
   UPLOAD = 'upload',
   DRAW = 'draw',
 }
 
 const Index = () => {
-  const [inputMode, setInputMode] = useState<InputMode>(InputMode.UPLOAD);
+  const [inputMode, setInputMode] = useState<InputMode>(InputMode.NONE);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [drawnImage, setDrawnImage] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -88,6 +89,11 @@ const Index = () => {
     setPrediction(null);
   };
 
+  const closeInput = () => {
+    setInputMode(InputMode.NONE);
+    setPrediction(null);
+  };
+
   return (
     <div className="min-h-screen flex flex-col">
       <AppHeader />
@@ -103,10 +109,10 @@ const Index = () => {
                     ? 'bg-white shadow-sm' 
                     : 'hover:bg-white/50'
                 }`}
-                onClick={switchToUpload}
+                onClick={inputMode === InputMode.UPLOAD ? closeInput : switchToUpload}
               >
                 <Upload className="w-4 h-4" />
-                Upload
+                {inputMode === InputMode.UPLOAD ? 'Hide Upload' : 'Upload'}
               </button>
               <button
                 className={`px-5 py-2 rounded-full flex items-center gap-2 transition-all ${
@@ -114,10 +120,10 @@ const Index = () => {
                     ? 'bg-white shadow-sm' 
                     : 'hover:bg-white/50'
                 }`}
-                onClick={switchToDraw}
+                onClick={inputMode === InputMode.DRAW ? closeInput : switchToDraw}
               >
                 <PenLine className="w-4 h-4" />
-                Draw
+                {inputMode === InputMode.DRAW ? 'Hide Canvas' : 'Draw'}
               </button>
             </div>
           </div>
@@ -125,19 +131,29 @@ const Index = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
             {/* Left Column - Input */}
             <div className="animate-slide-up">
-              {inputMode === InputMode.UPLOAD ? (
+              {inputMode === InputMode.UPLOAD && (
                 <FileUpload 
                   onImageSelect={handleImageSelect}
                   selectedImage={selectedImage}
                   isProcessing={isProcessing}
                   onPredict={handlePredict}
                 />
-              ) : (
+              )}
+              
+              {inputMode === InputMode.DRAW && (
                 <DrawingCanvas 
                   onImageGenerated={handleDrawingGenerated}
                   isProcessing={isProcessing}
                   onPredict={handlePredict}
                 />
+              )}
+              
+              {inputMode === InputMode.NONE && (
+                <div className="w-full flex flex-col items-center justify-center h-64 bg-gray-50 rounded-lg border-2 border-dashed border-gray-200">
+                  <p className="text-muted-foreground text-center">
+                    Select "Upload" or "Draw" to get started
+                  </p>
+                </div>
               )}
             </div>
             

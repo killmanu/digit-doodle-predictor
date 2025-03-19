@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import AppHeader from '../components/AppHeader';
 import FileUpload from '../components/FileUpload';
@@ -25,7 +24,6 @@ const Index = () => {
 
   const handleImageSelect = async (file: File) => {
     if (!file.size) {
-      // User clicked "New Image" which sends an empty file
       setSelectedImage(null);
       setPrediction(null);
       return;
@@ -60,13 +58,10 @@ const Index = () => {
     setPrediction(null);
 
     try {
-      // Resize the image to MNIST format (28x28 grayscale)
       const processedImage = await resizeImageToMnistFormat(imageToPredict);
       
-      // Send to backend API for prediction
       const result = await predictDigit(processedImage);
       
-      // Update the UI
       setPrediction(result.prediction);
       setConfidence(result.confidence);
       
@@ -95,19 +90,18 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col bg-gradient-to-br from-purple-50 to-indigo-50">
       <AppHeader />
       
       <main className="flex-1 container py-8">
         <div className="max-w-5xl mx-auto">
-          {/* Mode Selector */}
-          <div className="flex justify-center mb-8">
-            <div className="inline-flex rounded-full p-1 bg-secondary">
+          <div className="flex justify-center mb-8 animate-fade-in">
+            <div className="inline-flex rounded-full p-1 bg-white/80 shadow-lg backdrop-blur-sm border border-indigo-100">
               <button
                 className={`px-5 py-2 rounded-full flex items-center gap-2 transition-all ${
                   inputMode === InputMode.UPLOAD 
-                    ? 'bg-white shadow-sm' 
-                    : 'hover:bg-white/50'
+                    ? 'bg-indigo-500 text-white shadow-md' 
+                    : 'hover:bg-indigo-100 text-indigo-700'
                 }`}
                 onClick={inputMode === InputMode.UPLOAD ? closeInput : switchToUpload}
               >
@@ -117,8 +111,8 @@ const Index = () => {
               <button
                 className={`px-5 py-2 rounded-full flex items-center gap-2 transition-all ${
                   inputMode === InputMode.DRAW 
-                    ? 'bg-white shadow-sm' 
-                    : 'hover:bg-white/50'
+                    ? 'bg-indigo-500 text-white shadow-md' 
+                    : 'hover:bg-indigo-100 text-indigo-700'
                 }`}
                 onClick={inputMode === InputMode.DRAW ? closeInput : switchToDraw}
               >
@@ -128,51 +122,43 @@ const Index = () => {
             </div>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
-            {/* Left Column - Input */}
-            <div className="animate-slide-up">
-              {inputMode === InputMode.UPLOAD && (
-                <FileUpload 
-                  onImageSelect={handleImageSelect}
-                  selectedImage={selectedImage}
-                  isProcessing={isProcessing}
-                  onPredict={handlePredict}
-                />
-              )}
+          {inputMode !== InputMode.NONE ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
+              <div className="animate-slide-up backdrop-blur-sm bg-white/60 rounded-2xl p-6 shadow-xl border border-white/80">
+                {inputMode === InputMode.UPLOAD && (
+                  <FileUpload 
+                    onImageSelect={handleImageSelect}
+                    selectedImage={selectedImage}
+                    isProcessing={isProcessing}
+                    onPredict={handlePredict}
+                  />
+                )}
+                
+                {inputMode === InputMode.DRAW && (
+                  <DrawingCanvas 
+                    onImageGenerated={handleDrawingGenerated}
+                    isProcessing={isProcessing}
+                    onPredict={handlePredict}
+                  />
+                )}
+              </div>
               
-              {inputMode === InputMode.DRAW && (
-                <DrawingCanvas 
-                  onImageGenerated={handleDrawingGenerated}
-                  isProcessing={isProcessing}
-                  onPredict={handlePredict}
+              <div className="animate-slide-up backdrop-blur-sm bg-white/60 rounded-2xl p-6 shadow-xl border border-white/80" style={{ animationDelay: '100ms' }}>
+                <PredictionDisplay 
+                  prediction={prediction}
+                  confidence={confidence}
+                  isProcessing={isProcessing} 
                 />
-              )}
-              
-              {inputMode === InputMode.NONE && (
-                <div className="w-full flex flex-col items-center justify-center h-64 bg-gray-50 rounded-lg border-2 border-dashed border-gray-200">
-                  <p className="text-muted-foreground text-center">
-                    Select "Upload" or "Draw" to get started
-                  </p>
-                </div>
-              )}
+              </div>
             </div>
-            
-            {/* Right Column - Prediction */}
-            <div className="animate-slide-up" style={{ animationDelay: '100ms' }}>
-              <PredictionDisplay 
-                prediction={prediction}
-                confidence={confidence}
-                isProcessing={isProcessing} 
-              />
-            </div>
-          </div>
+          ) : null}
         </div>
       </main>
       
-      <footer className="py-6 border-t">
-        <div className="container text-center text-sm text-muted-foreground">
+      <footer className="py-6 border-t border-indigo-100/50 bg-white/50 backdrop-blur-sm">
+        <div className="container text-center text-sm text-indigo-500">
           Handwritten Digit Recognition • 
-          <a href="https://github.com" className="text-primary hover:underline ml-1" target="_blank" rel="noreferrer">
+          <a href="https://github.com" className="text-indigo-700 hover:underline ml-1" target="_blank" rel="noreferrer">
             View Source
           </a>
         </div>

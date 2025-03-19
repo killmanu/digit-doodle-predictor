@@ -129,12 +129,12 @@ const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
 
   return (
     <div className="w-full flex flex-col items-center animate-fade-in">
-      <div className="digit-container mb-4 w-full max-w-sm">
+      <div className="bg-white rounded-xl p-4 shadow-md mb-4 w-full border border-indigo-100">
         <canvas
           ref={canvasRef}
           width={280}
           height={280}
-          className="drawing-canvas w-full touch-none"
+          className="drawing-canvas w-full touch-none border-2 border-indigo-100/50 rounded-lg"
           onMouseDown={startDrawing}
           onMouseMove={draw}
           onMouseUp={stopDrawing}
@@ -146,7 +146,7 @@ const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
       </div>
       <div className="flex justify-center gap-3">
         <button
-          className="btn-secondary flex items-center gap-2"
+          className="px-5 py-2 rounded-full bg-indigo-100 text-indigo-700 shadow hover:shadow-md transition-all flex items-center gap-2"
           onClick={clearCanvas}
           type="button"
           disabled={isProcessing || !hasDrawn}
@@ -155,14 +155,14 @@ const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
           Clear
         </button>
         <button
-          className="btn-primary flex items-center gap-2"
+          className="px-5 py-2 rounded-full bg-gradient-to-r from-indigo-500 to-purple-500 text-white shadow hover:shadow-md transition-all flex items-center gap-2"
           onClick={onPredict}
           type="button"
           disabled={isProcessing || !hasDrawn}
         >
           {isProcessing ? (
             <div className="flex items-center gap-2">
-              <div className="h-4 w-4 rounded-full border-2 border-primary-foreground border-t-transparent animate-spin"></div>
+              <div className="h-4 w-4 rounded-full border-2 border-white border-t-transparent animate-spin"></div>
               Processing...
             </div>
           ) : (

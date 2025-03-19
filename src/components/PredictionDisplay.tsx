@@ -14,27 +14,31 @@ const PredictionDisplay: React.FC<PredictionDisplayProps> = ({
 }) => {
   return (
     <div className="w-full flex flex-col items-center">
-      <div className="digit-container w-full max-w-sm h-full min-h-[280px] flex flex-col items-center justify-center">
+      <div className="w-full h-full min-h-[280px] flex flex-col items-center justify-center">
         {isProcessing ? (
           <div className="flex flex-col items-center justify-center h-full">
-            <div className="w-16 h-16 rounded-full border-4 border-primary/30 border-t-primary animate-spin mb-6"></div>
-            <p className="text-muted-foreground">Processing digit...</p>
+            <div className="w-16 h-16 rounded-full border-4 border-indigo-300 border-t-indigo-600 animate-spin mb-6"></div>
+            <p className="text-indigo-600/70">Processing digit...</p>
           </div>
         ) : prediction !== null ? (
           <div className="flex flex-col items-center animate-fade-in">
-            <div className="result-display">{prediction}</div>
+            <div className="text-[120px] font-bold text-transparent bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text leading-none">
+              {prediction}
+            </div>
             {confidence !== undefined && (
-              <div className="mt-2 text-sm text-muted-foreground">
+              <div className="mt-2 text-sm text-indigo-600/70 bg-white/50 px-4 py-1 rounded-full shadow-sm">
                 Confidence: {(confidence * 100).toFixed(2)}%
               </div>
             )}
           </div>
         ) : (
           <div className="flex flex-col items-center text-center px-4">
-            <div className="w-24 h-24 rounded-full bg-secondary flex items-center justify-center mb-4">
-              <span className="text-4xl font-light text-muted-foreground">?</span>
+            <div className="w-24 h-24 rounded-full bg-gradient-to-br from-indigo-100 to-purple-100 flex items-center justify-center mb-6 shadow-md">
+              <span className="text-4xl font-medium text-indigo-500">?</span>
             </div>
-            <p className="text-muted-foreground">Upload an image or draw a digit to see the prediction</p>
+            <p className="text-indigo-600/70 bg-white/50 px-4 py-2 rounded-full shadow-sm">
+              Upload an image or draw a digit to see the prediction
+            </p>
           </div>
         )}
       </div>

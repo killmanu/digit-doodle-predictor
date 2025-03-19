@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import AppHeader from '../components/AppHeader';
 import FileUpload from '../components/FileUpload';
 import DrawingCanvas from '../components/DrawingCanvas';
@@ -22,6 +22,16 @@ const Index = () => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [prediction, setPrediction] = useState<number | null>(null);
   const [confidence, setConfidence] = useState<number | undefined>(undefined);
+  const [showContent, setShowContent] = useState(false);
+
+  useEffect(() => {
+    // Add opening animation by delaying content visibility
+    const timer = setTimeout(() => {
+      setShowContent(true);
+    }, 500);
+    
+    return () => clearTimeout(timer);
+  }, []);
 
   const handleImageSelect = async (file: File) => {
     if (!file.size) {
@@ -89,9 +99,9 @@ const Index = () => {
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-purple-50 via-indigo-50 to-pink-50">
       <AppHeader />
       
-      <main className="flex-1 container py-10">
+      <main className={`flex-1 container py-10 transition-opacity duration-1000 ${showContent ? 'opacity-100' : 'opacity-0'}`}>
         <div className="max-w-5xl mx-auto">
-          <div className="flex justify-center mb-10 animate-fade-in">
+          <div className="flex justify-center mb-10 animate-fade-in" style={{ animationDelay: '600ms' }}>
             <div className="inline-flex rounded-full p-1.5 bg-white/80 shadow-lg backdrop-blur-sm border border-indigo-100">
               <button
                 className={`px-6 py-2.5 rounded-full flex items-center gap-2 transition-all ${
@@ -119,8 +129,8 @@ const Index = () => {
           </div>
           
           {inputMode !== InputMode.NONE ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
-              <div className="animate-slide-up backdrop-blur-sm bg-white/70 rounded-2xl p-7 shadow-xl border border-white/80 hover:shadow-2xl transition-all duration-300">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start animate-fade-in" style={{ animationDelay: '800ms' }}>
+              <div className="backdrop-blur-sm bg-white/70 rounded-2xl p-7 shadow-xl border border-white/80 hover:shadow-2xl transition-all duration-300">
                 {inputMode === InputMode.UPLOAD && (
                   <FileUpload 
                     onImageSelect={handleImageSelect}
@@ -139,7 +149,7 @@ const Index = () => {
                 )}
               </div>
               
-              <div className="animate-slide-up backdrop-blur-sm bg-white/70 rounded-2xl p-7 shadow-xl border border-white/80 hover:shadow-2xl transition-all duration-300" style={{ animationDelay: '100ms' }}>
+              <div className="backdrop-blur-sm bg-white/70 rounded-2xl p-7 shadow-xl border border-white/80 hover:shadow-2xl transition-all duration-300">
                 <PredictionDisplay 
                   prediction={prediction}
                   confidence={confidence}
@@ -148,7 +158,7 @@ const Index = () => {
               </div>
             </div>
           ) : (
-            <div className="animate-fade-in flex flex-col items-center justify-center p-10 backdrop-blur-sm bg-white/60 rounded-2xl shadow-xl border border-white/80 max-w-2xl mx-auto">
+            <div className="animate-fade-in flex flex-col items-center justify-center p-10 backdrop-blur-sm bg-white/60 rounded-2xl shadow-xl border border-white/80 max-w-2xl mx-auto" style={{ animationDelay: '700ms' }}>
               <div className="mb-8 p-6 bg-gradient-to-r from-indigo-500/10 via-purple-500/10 to-pink-500/10 rounded-2xl border border-indigo-100/50">
                 <div className="w-28 h-28 rounded-full bg-gradient-to-br from-indigo-100 via-purple-100 to-pink-100 flex items-center justify-center mb-6 shadow-md mx-auto">
                   <span className="text-5xl font-medium text-transparent bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 bg-clip-text">?</span>

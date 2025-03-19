@@ -1,5 +1,6 @@
 
 import React from 'react';
+import { Brain, AlertCircle } from 'lucide-react';
 
 interface PredictionDisplayProps {
   prediction: number | null;
@@ -22,22 +23,24 @@ const PredictionDisplay: React.FC<PredictionDisplayProps> = ({
           </div>
         ) : prediction !== null ? (
           <div className="flex flex-col items-center animate-fade-in">
-            <div className="text-[120px] font-bold text-transparent bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text leading-none">
+            <div className="text-[140px] font-bold text-transparent bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-500 bg-clip-text leading-none">
               {prediction}
             </div>
             {confidence !== undefined && (
-              <div className="mt-2 text-sm text-indigo-600/70 bg-white/50 px-4 py-1 rounded-full shadow-sm">
+              <div className="mt-3 text-sm flex items-center gap-2 text-indigo-600/80 bg-white/70 px-5 py-2 rounded-full shadow-sm">
+                <Brain className="w-4 h-4" />
                 Confidence: {(confidence * 100).toFixed(2)}%
               </div>
             )}
           </div>
         ) : (
           <div className="flex flex-col items-center text-center px-4">
-            <div className="w-24 h-24 rounded-full bg-gradient-to-br from-indigo-100 to-purple-100 flex items-center justify-center mb-6 shadow-md">
-              <span className="text-4xl font-medium text-indigo-500">?</span>
+            <div className="w-28 h-28 rounded-full bg-gradient-to-br from-indigo-100 via-purple-100 to-pink-100 flex items-center justify-center mb-6 shadow-md">
+              <span className="text-5xl font-medium text-transparent bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 bg-clip-text">?</span>
             </div>
-            <p className="text-indigo-600/70 bg-white/50 px-4 py-2 rounded-full shadow-sm">
-              Upload an image or draw a digit to see the prediction
+            <p className="text-indigo-600/70 bg-white/70 px-5 py-2.5 rounded-full shadow-sm flex items-center gap-1.5">
+              <AlertCircle className="w-4 h-4 text-indigo-500" />
+              Select "Upload" or "Draw" to get started
             </p>
           </div>
         )}

@@ -1,5 +1,4 @@
-
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@200;300;400;500;600;700;800&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -46,16 +45,54 @@
 
   body {
     @apply bg-background text-foreground font-sans;
-    font-family: 'Inter', sans-serif;
+    font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
   }
 
   .glassmorphism {
-    @apply bg-white/80 backdrop-blur-lg border border-white/30;
+    @apply bg-white/80 backdrop-blur-lg border border-white/30 shadow-xl;
+  }
+  
+  .glassmorphism-light {
+    @apply bg-white/60 backdrop-blur-sm border border-white/30 shadow-md;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Plus Jakarta Sans', sans-serif;
   }
 }
 
 @layer components {
   .digit-container {
+    @apply relative rounded-2xl bg-white border border-border p-6 shadow-sm transition-all duration-300;
+  }
+  
+  .digit-container:hover {
+    @apply shadow-md;
+  }
+
+  .btn-primary {
+    @apply rounded-full bg-gradient-to-r from-indigo-500 to-purple-500 text-white px-6 py-2.5 font-medium transition-all duration-300 hover:shadow-md hover:opacity-95 disabled:opacity-50;
+  }
+
+  .btn-secondary {
+    @apply rounded-full bg-white text-indigo-700 px-6 py-2.5 font-medium transition-all duration-300 border border-indigo-100 hover:shadow-sm hover:bg-indigo-50 disabled:opacity-50;
+  }
+
+  .drawing-canvas {
+    @apply bg-white rounded-xl border border-border;
+    touch-action: none;
+  }
+
+  .result-display {
+    @apply text-[140px] font-bold text-transparent bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-500 bg-clip-text leading-none;
+  }
+  
+  .hover-scale {
+    @apply transition-transform hover:scale-[1.02] duration-300;
+  }
+}
+
+.digit-container {
     @apply relative rounded-2xl bg-white border border-border p-6 shadow-sm transition-all duration-300;
   }
   
@@ -79,4 +116,3 @@
   .result-display {
     @apply text-[120px] font-light text-primary leading-none;
   }
-}

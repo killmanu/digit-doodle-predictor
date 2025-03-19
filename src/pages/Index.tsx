@@ -7,7 +7,7 @@ import PredictionDisplay from '../components/PredictionDisplay';
 import { predictDigit } from '../services/api';
 import { resizeImageToMnistFormat, fileToDataUrl } from '../utils/imageProcessing';
 import { PenLine, Upload } from 'lucide-react';
-import { toast } from '@/components/ui/sonner';
+import { toast } from 'sonner';
 
 enum InputMode {
   UPLOAD = 'upload',

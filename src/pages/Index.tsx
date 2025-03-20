@@ -280,7 +280,7 @@ const Index = () => {
           <div>
             <span>Handwritten Digit Recognition</span>
             <span className="text-indigo-300 mx-2">•</span>
-            <a href="https://github.com" className="text-indigo-700 hover:underline flex items-center gap-1 inline-flex" target="_blank" rel="noreferrer">
+            <a href="https://github.com" className="text-indigo-700 hover:underline inline-flex items-center gap-1" target="_blank" rel="noreferrer">
               <Github className="w-3.5 h-3.5" />
               View Source
             </a>

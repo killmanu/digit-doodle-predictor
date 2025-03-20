@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import AppHeader from '../components/AppHeader';
 import FileUpload from '../components/FileUpload';
@@ -6,7 +7,7 @@ import PredictionDisplay from '../components/PredictionDisplay';
 import CameraCapture from '../components/CameraCapture';
 import { predictDigit } from '../services/api';
 import { resizeImageToMnistFormat, fileToDataUrl } from '../utils/imageProcessing';
-import { PenLine, Upload, Github, Camera } from 'lucide-react';
+import { PenLine, Upload, Github, Camera, Home } from 'lucide-react';
 import { toast } from 'sonner';
 
 enum InputMode {
@@ -122,9 +123,69 @@ const Index = () => {
     setPrediction(null);
   };
 
+  const goHome = () => {
+    setInputMode(InputMode.NONE);
+    setPrediction(null);
+  };
+
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-purple-50 via-indigo-50 to-pink-50">
       <AppHeader />
+      
+      {inputMode !== InputMode.NONE && (
+        <div className="bg-white/40 backdrop-blur-sm border-b border-indigo-100 py-2 sticky top-0 z-10 animate-fade-in">
+          <div className="container">
+            <div className="flex items-center gap-6">
+              <button 
+                onClick={goHome}
+                className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-white/60 transition-colors text-indigo-700"
+              >
+                <Home className="w-4 h-4" />
+                <span>Home</span>
+              </button>
+              
+              <div className="flex items-center gap-2">
+                <span className="text-indigo-500/70">Input mode:</span>
+                <div className="flex gap-2">
+                  <button
+                    onClick={switchToUpload}
+                    className={`px-3 py-1 rounded-full flex items-center gap-1 text-sm transition-colors ${
+                      inputMode === InputMode.UPLOAD 
+                        ? 'bg-indigo-100 text-indigo-700' 
+                        : 'text-indigo-500 hover:bg-white/60'
+                    }`}
+                  >
+                    <Upload className="w-3.5 h-3.5" />
+                    Upload
+                  </button>
+                  <button
+                    onClick={switchToDraw}
+                    className={`px-3 py-1 rounded-full flex items-center gap-1 text-sm transition-colors ${
+                      inputMode === InputMode.DRAW 
+                        ? 'bg-purple-100 text-purple-700' 
+                        : 'text-purple-500 hover:bg-white/60'
+                    }`}
+                  >
+                    <PenLine className="w-3.5 h-3.5" />
+                    Draw
+                  </button>
+                  <button
+                    onClick={switchToCamera}
+                    className={`px-3 py-1 rounded-full flex items-center gap-1 text-sm transition-colors ${
+                      inputMode === InputMode.CAMERA 
+                        ? 'bg-pink-100 text-pink-700' 
+                        : 'text-pink-500 hover:bg-white/60'
+                    }`}
+                  >
+                    <Camera className="w-3.5 h-3.5" />
+                    Camera
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
       
       <main className={`flex-1 container py-10 transition-opacity duration-1000 ${showContent ? 'opacity-100' : 'opacity-0'}`}>
         <div className="max-w-5xl mx-auto">
@@ -216,10 +277,10 @@ const Index = () => {
       
       <footer className="py-6 border-t border-indigo-100/50 bg-white/50 backdrop-blur-sm">
         <div className="container text-center text-sm text-indigo-500">
-          <div className="flex items-center justify-center gap-2">
+          <div>
             <span>Handwritten Digit Recognition</span>
-            <span className="text-indigo-300">•</span>
-            <a href="https://github.com" className="text-indigo-700 hover:underline flex items-center gap-1" target="_blank" rel="noreferrer">
+            <span className="text-indigo-300 mx-2">•</span>
+            <a href="https://github.com" className="text-indigo-700 hover:underline flex items-center gap-1 inline-flex" target="_blank" rel="noreferrer">
               <Github className="w-3.5 h-3.5" />
               View Source
             </a>

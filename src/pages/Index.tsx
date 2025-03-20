@@ -108,23 +108,13 @@ const Index = () => {
     }
   };
 
-  const switchToUpload = () => {
-    setInputMode(inputMode === InputMode.UPLOAD ? InputMode.NONE : InputMode.UPLOAD);
-    setPrediction(null);
-  };
-
-  const switchToDraw = () => {
-    setInputMode(inputMode === InputMode.DRAW ? InputMode.NONE : InputMode.DRAW);
-    setPrediction(null);
-  };
-
-  const switchToCamera = () => {
-    setInputMode(inputMode === InputMode.CAMERA ? InputMode.NONE : InputMode.CAMERA);
-    setPrediction(null);
-  };
-
-  const goHome = () => {
-    setInputMode(InputMode.NONE);
+  const setMode = (mode: InputMode) => {
+    // If same mode is clicked, don't clear it
+    if (inputMode === mode && mode !== InputMode.NONE) {
+      return;
+    }
+    
+    setInputMode(mode);
     setPrediction(null);
   };
 
@@ -132,60 +122,55 @@ const Index = () => {
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-purple-50 via-indigo-50 to-pink-50">
       <AppHeader />
       
-      {inputMode !== InputMode.NONE && (
-        <div className="bg-white/40 backdrop-blur-sm border-b border-indigo-100 py-2 sticky top-0 z-10 animate-fade-in">
-          <div className="container">
-            <div className="flex items-center gap-6">
-              <button 
-                onClick={goHome}
-                className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-white/60 transition-colors text-indigo-700"
-              >
-                <Home className="w-4 h-4" />
-                <span>Home</span>
-              </button>
-              
-              <div className="flex items-center gap-2">
-                <span className="text-indigo-500/70">Input mode:</span>
-                <div className="flex gap-2">
-                  <button
-                    onClick={switchToUpload}
-                    className={`px-3 py-1 rounded-full flex items-center gap-1 text-sm transition-colors ${
-                      inputMode === InputMode.UPLOAD 
-                        ? 'bg-indigo-100 text-indigo-700' 
-                        : 'text-indigo-500 hover:bg-white/60'
-                    }`}
-                  >
-                    <Upload className="w-3.5 h-3.5" />
-                    Upload
-                  </button>
-                  <button
-                    onClick={switchToDraw}
-                    className={`px-3 py-1 rounded-full flex items-center gap-1 text-sm transition-colors ${
-                      inputMode === InputMode.DRAW 
-                        ? 'bg-purple-100 text-purple-700' 
-                        : 'text-purple-500 hover:bg-white/60'
-                    }`}
-                  >
-                    <PenLine className="w-3.5 h-3.5" />
-                    Draw
-                  </button>
-                  <button
-                    onClick={switchToCamera}
-                    className={`px-3 py-1 rounded-full flex items-center gap-1 text-sm transition-colors ${
-                      inputMode === InputMode.CAMERA 
-                        ? 'bg-pink-100 text-pink-700' 
-                        : 'text-pink-500 hover:bg-white/60'
-                    }`}
-                  >
-                    <Camera className="w-3.5 h-3.5" />
-                    Camera
-                  </button>
-                </div>
-              </div>
-            </div>
+      <div className="bg-white/40 backdrop-blur-sm border-b border-indigo-100 py-2 sticky top-0 z-10 animate-fade-in">
+        <div className="container">
+          <div className="flex items-center justify-center gap-4 flex-wrap">
+            <button 
+              onClick={() => setMode(InputMode.NONE)}
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors
+                ${inputMode === InputMode.NONE 
+                  ? 'bg-indigo-100 text-indigo-700' 
+                  : 'hover:bg-white/60 text-indigo-600'}`}
+            >
+              <Home className="w-4 h-4" />
+              <span>Home</span>
+            </button>
+            
+            <button
+              onClick={() => setMode(InputMode.UPLOAD)}
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors
+                ${inputMode === InputMode.UPLOAD 
+                  ? 'bg-indigo-100 text-indigo-700' 
+                  : 'hover:bg-white/60 text-indigo-600'}`}
+            >
+              <Upload className="w-4 h-4" />
+              <span>Upload</span>
+            </button>
+            
+            <button
+              onClick={() => setMode(InputMode.DRAW)}
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors
+                ${inputMode === InputMode.DRAW 
+                  ? 'bg-purple-100 text-purple-700' 
+                  : 'hover:bg-white/60 text-purple-600'}`}
+            >
+              <PenLine className="w-4 h-4" />
+              <span>Draw</span>
+            </button>
+            
+            <button
+              onClick={() => setMode(InputMode.CAMERA)}
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors
+                ${inputMode === InputMode.CAMERA 
+                  ? 'bg-pink-100 text-pink-700' 
+                  : 'hover:bg-white/60 text-pink-600'}`}
+            >
+              <Camera className="w-4 h-4" />
+              <span>Camera</span>
+            </button>
           </div>
         </div>
-      )}
+      </div>
       
       <main className={`flex-1 container py-10 transition-opacity duration-1000 ${showContent ? 'opacity-100' : 'opacity-0'}`}>
         <div className="max-w-5xl mx-auto">
@@ -241,7 +226,7 @@ const Index = () => {
               
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 w-full max-w-xl">
                 <button
-                  onClick={switchToUpload}
+                  onClick={() => setMode(InputMode.UPLOAD)}
                   className="py-4 px-6 rounded-xl bg-white border border-indigo-100 shadow-md hover:shadow-lg transition-all duration-300 flex flex-col items-center gap-3 group"
                 >
                   <div className="w-12 h-12 rounded-full bg-indigo-100 flex items-center justify-center group-hover:bg-indigo-200 transition-colors">
@@ -251,7 +236,7 @@ const Index = () => {
                 </button>
                 
                 <button
-                  onClick={switchToDraw}
+                  onClick={() => setMode(InputMode.DRAW)}
                   className="py-4 px-6 rounded-xl bg-white border border-indigo-100 shadow-md hover:shadow-lg transition-all duration-300 flex flex-col items-center gap-3 group"
                 >
                   <div className="w-12 h-12 rounded-full bg-purple-100 flex items-center justify-center group-hover:bg-purple-200 transition-colors">
@@ -261,7 +246,7 @@ const Index = () => {
                 </button>
 
                 <button
-                  onClick={switchToCamera}
+                  onClick={() => setMode(InputMode.CAMERA)}
                   className="py-4 px-6 rounded-xl bg-white border border-indigo-100 shadow-md hover:shadow-lg transition-all duration-300 flex flex-col items-center gap-3 group"
                 >
                   <div className="w-12 h-12 rounded-full bg-pink-100 flex items-center justify-center group-hover:bg-pink-200 transition-colors">

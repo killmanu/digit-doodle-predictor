@@ -1,31 +1,32 @@
-
 import React, { useState, useEffect } from 'react';
 import AppHeader from '../components/AppHeader';
 import FileUpload from '../components/FileUpload';
 import DrawingCanvas from '../components/DrawingCanvas';
 import PredictionDisplay from '../components/PredictionDisplay';
+import CameraCapture from '../components/CameraCapture';
 import { predictDigit } from '../services/api';
 import { resizeImageToMnistFormat, fileToDataUrl } from '../utils/imageProcessing';
-import { PenLine, Upload, Github } from 'lucide-react';
+import { PenLine, Upload, Github, Camera } from 'lucide-react';
 import { toast } from 'sonner';
 
 enum InputMode {
   NONE = 'none',
   UPLOAD = 'upload',
   DRAW = 'draw',
+  CAMERA = 'camera',
 }
 
 const Index = () => {
   const [inputMode, setInputMode] = useState<InputMode>(InputMode.NONE);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [drawnImage, setDrawnImage] = useState<string | null>(null);
+  const [capturedImage, setCapturedImage] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [prediction, setPrediction] = useState<number | null>(null);
   const [confidence, setConfidence] = useState<number | undefined>(undefined);
   const [showContent, setShowContent] = useState(false);
 
   useEffect(() => {
-    // Add opening animation by delaying content visibility
     const timer = setTimeout(() => {
       setShowContent(true);
     }, 500);
@@ -57,11 +58,32 @@ const Index = () => {
     }
   };
 
+  const handleCameraCapture = (imageData: string) => {
+    setCapturedImage(imageData);
+    if (!imageData) {
+      setPrediction(null);
+    }
+  };
+
   const handlePredict = async () => {
-    let imageToPredict = inputMode === InputMode.UPLOAD ? selectedImage : drawnImage;
+    let imageToPredict;
+    
+    switch(inputMode) {
+      case InputMode.UPLOAD:
+        imageToPredict = selectedImage;
+        break;
+      case InputMode.DRAW:
+        imageToPredict = drawnImage;
+        break;
+      case InputMode.CAMERA:
+        imageToPredict = capturedImage;
+        break;
+      default:
+        imageToPredict = null;
+    }
     
     if (!imageToPredict) {
-      toast.warning('Please upload or draw an image first');
+      toast.warning('Please upload, draw, or capture an image first');
       return;
     }
 
@@ -95,6 +117,11 @@ const Index = () => {
     setPrediction(null);
   };
 
+  const switchToCamera = () => {
+    setInputMode(inputMode === InputMode.CAMERA ? InputMode.NONE : InputMode.CAMERA);
+    setPrediction(null);
+  };
+
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-purple-50 via-indigo-50 to-pink-50">
       <AppHeader />
@@ -121,6 +148,15 @@ const Index = () => {
                     onPredict={handlePredict}
                   />
                 )}
+
+                {inputMode === InputMode.CAMERA && (
+                  <CameraCapture 
+                    onImageCaptured={handleCameraCapture}
+                    capturedImage={capturedImage}
+                    isProcessing={isProcessing}
+                    onPredict={handlePredict}
+                  />
+                )}
               </div>
               
               <div className="backdrop-blur-sm bg-white/70 rounded-2xl p-7 shadow-xl border border-white/80 hover:shadow-2xl transition-all duration-300">
@@ -138,11 +174,11 @@ const Index = () => {
                   <span className="text-5xl font-medium text-transparent bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 bg-clip-text">?</span>
                 </div>
                 <p className="text-indigo-700/80 text-center text-lg">
-                  Select <span className="font-semibold">"Upload"</span> or <span className="font-semibold">"Draw"</span> to get started
+                  Select an option below to get started
                 </p>
               </div>
               
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full max-w-md">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 w-full max-w-xl">
                 <button
                   onClick={switchToUpload}
                   className="py-4 px-6 rounded-xl bg-white border border-indigo-100 shadow-md hover:shadow-lg transition-all duration-300 flex flex-col items-center gap-3 group"
@@ -150,7 +186,7 @@ const Index = () => {
                   <div className="w-12 h-12 rounded-full bg-indigo-100 flex items-center justify-center group-hover:bg-indigo-200 transition-colors">
                     <Upload className="w-6 h-6 text-indigo-600" />
                   </div>
-                  <span className="font-medium text-indigo-700">Upload Image</span>
+                  <span className="font-medium text-indigo-700">Upload</span>
                 </button>
                 
                 <button
@@ -160,7 +196,17 @@ const Index = () => {
                   <div className="w-12 h-12 rounded-full bg-purple-100 flex items-center justify-center group-hover:bg-purple-200 transition-colors">
                     <PenLine className="w-6 h-6 text-purple-600" />
                   </div>
-                  <span className="font-medium text-purple-700">Draw Digit</span>
+                  <span className="font-medium text-purple-700">Draw</span>
+                </button>
+
+                <button
+                  onClick={switchToCamera}
+                  className="py-4 px-6 rounded-xl bg-white border border-indigo-100 shadow-md hover:shadow-lg transition-all duration-300 flex flex-col items-center gap-3 group"
+                >
+                  <div className="w-12 h-12 rounded-full bg-pink-100 flex items-center justify-center group-hover:bg-pink-200 transition-colors">
+                    <Camera className="w-6 h-6 text-pink-600" />
+                  </div>
+                  <span className="font-medium text-pink-700">Camera</span>
                 </button>
               </div>
             </div>

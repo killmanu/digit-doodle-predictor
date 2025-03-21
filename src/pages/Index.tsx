@@ -259,19 +259,6 @@ const Index = () => {
           )}
         </div>
       </main>
-      
-      <footer className="py-6 border-t border-indigo-100/50 bg-white/50 backdrop-blur-sm">
-        <div className="container text-center text-sm text-indigo-500">
-          <div>
-            <span>Handwritten Digit Recognition</span>
-            <span className="text-indigo-300 mx-2">•</span>
-            <a href="https://github.com" className="text-indigo-700 hover:underline inline-flex items-center gap-1" target="_blank" rel="noreferrer">
-              <Github className="w-3.5 h-3.5" />
-              View Source
-            </a>
-          </div>
-        </div>
-      </footer>
     </div>
   );
 };

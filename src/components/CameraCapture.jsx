@@ -16,6 +16,10 @@ const CameraCapture = ({ onImageCaptured, capturedImage, isProcessing, onPredict
   const startCamera = async () => {
     try {
       setError(null);
+      // Stop any existing stream first
+      stopCamera();
+      
+      console.log('Attempting to start camera...');
       const mediaStream = await navigator.mediaDevices.getUserMedia({ 
         video: { 
           facingMode: 'environment',
@@ -26,9 +30,18 @@ const CameraCapture = ({ onImageCaptured, capturedImage, isProcessing, onPredict
       
       if (videoRef.current) {
         videoRef.current.srcObject = mediaStream;
+        videoRef.current.onloadedmetadata = () => {
+          if (videoRef.current) {
+            videoRef.current.play().catch(err => {
+              console.error('Error playing video:', err);
+              setError('Could not play video stream');
+            });
+          }
+        };
         setStream(mediaStream);
         setCameraActive(true);
         setHasPermission(true);
+        console.log('Camera started successfully');
       }
     } catch (err) {
       console.error('Error accessing camera:', err);
@@ -37,7 +50,7 @@ const CameraCapture = ({ onImageCaptured, capturedImage, isProcessing, onPredict
         setHasPermission(false);
         toast.error('Camera access denied. Please allow camera access.');
       } else {
-        setError('Could not access the camera');
+        setError(`Could not access the camera: ${err.message}`);
         toast.error('Could not access the camera');
       }
     }
@@ -65,45 +78,68 @@ const CameraCapture = ({ onImageCaptured, capturedImage, isProcessing, onPredict
   // Automatically start camera when component mounts if no image is captured
   useEffect(() => {
     if (!capturedImage && !cameraActive && !error) {
+      console.log('Auto-starting camera...');
       startCamera();
     }
   }, [capturedImage, cameraActive]);
   
   // Capture image from camera
   const captureImage = () => {
-    if (!videoRef.current || !canvasRef.current) return;
+    if (!videoRef.current || !canvasRef.current) {
+      console.error('Video or canvas ref is not available');
+      return;
+    }
     
     const video = videoRef.current;
     const canvas = canvasRef.current;
     const context = canvas.getContext('2d');
     
-    // Get video dimensions
-    const videoWidth = video.videoWidth;
-    const videoHeight = video.videoHeight;
+    if (!context) {
+      console.error('Could not get canvas context');
+      return;
+    }
     
-    // Use the smaller dimension to make a square
-    const size = Math.min(videoWidth, videoHeight);
-    
-    // Calculate cropping position (center of the video)
-    const xStart = (videoWidth - size) / 2;
-    const yStart = (videoHeight - size) / 2;
-    
-    // Set canvas size to match the square crop
-    canvas.width = canvas.height = size;
-    
-    // Draw the cropped square to the canvas
-    context.drawImage(
-      video,
-      xStart, yStart, size, size,  // Source rectangle
-      0, 0, size, size             // Destination rectangle
-    );
-    
-    // Convert to data URL and send to parent
-    const imageData = canvas.toDataURL('image/png');
-    onImageCaptured(imageData);
-    
-    // Stop the camera
-    stopCamera();
+    try {
+      // Get video dimensions
+      const videoWidth = video.videoWidth;
+      const videoHeight = video.videoHeight;
+      
+      if (!videoWidth || !videoHeight) {
+        console.error('Video dimensions not available');
+        return;
+      }
+      
+      console.log(`Video dimensions: ${videoWidth}x${videoHeight}`);
+      
+      // Use the smaller dimension to make a square
+      const size = Math.min(videoWidth, videoHeight);
+      
+      // Calculate cropping position (center of the video)
+      const xStart = (videoWidth - size) / 2;
+      const yStart = (videoHeight - size) / 2;
+      
+      // Set canvas size to match the square crop
+      canvas.width = canvas.height = size;
+      
+      // Draw the cropped square to the canvas
+      context.drawImage(
+        video,
+        xStart, yStart, size, size,  // Source rectangle
+        0, 0, size, size             // Destination rectangle
+      );
+      
+      // Convert to data URL and send to parent
+      const imageData = canvas.toDataURL('image/png');
+      onImageCaptured(imageData);
+      
+      // Stop the camera
+      stopCamera();
+      
+      console.log('Image captured successfully');
+    } catch (err) {
+      console.error('Error capturing image:', err);
+      toast.error('Failed to capture image');
+    }
   };
   
   const resetCapture = () => {
@@ -144,6 +180,7 @@ const CameraCapture = ({ onImageCaptured, capturedImage, isProcessing, onPredict
                   ref={videoRef} 
                   autoPlay 
                   playsInline 
+                  muted
                   className="absolute inset-0 w-full h-full object-cover"
                 />
                 <div className="absolute inset-0 border-4 border-white/70 pointer-events-none"></div>
@@ -203,6 +240,7 @@ const CameraCapture = ({ onImageCaptured, capturedImage, isProcessing, onPredict
               variant="outline"
               onClick={handleRetakeClick}
               className="flex items-center gap-2"
+              disabled={isProcessing}
             >
               <RotateCcw className="w-4 h-4" />
               <span>Retake</span>
@@ -211,6 +249,7 @@ const CameraCapture = ({ onImageCaptured, capturedImage, isProcessing, onPredict
             <Button
               onClick={onPredict}
               disabled={isProcessing}
+              className="flex items-center gap-2"
             >
               {isProcessing ? (
                 <span className="flex items-center gap-2">

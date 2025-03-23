@@ -61,6 +61,13 @@ const CameraCapture = ({ onImageCaptured, capturedImage, isProcessing, onPredict
       stopCamera();
     };
   }, []);
+
+  // Automatically start camera when component mounts if no image is captured
+  useEffect(() => {
+    if (!capturedImage && !cameraActive && !error) {
+      startCamera();
+    }
+  }, [capturedImage, cameraActive]);
   
   // Capture image from camera
   const captureImage = () => {

@@ -1,12 +1,12 @@
 
 import React, { useState, useEffect } from 'react';
-import AppHeader from '../components/AppHeader';
-import FileUpload from '../components/FileUpload';
-import DrawingCanvas from '../components/DrawingCanvas';
-import PredictionDisplay from '../components/PredictionDisplay';
-import CameraCapture from '../components/CameraCapture';
-import { predictDigit } from '../services/api';
-import { resizeImageToMnistFormat, fileToDataUrl } from '../utils/imageProcessing';
+import AppHeader from '../components/AppHeader.jsx';
+import FileUpload from '../components/FileUpload.jsx';
+import DrawingCanvas from '../components/DrawingCanvas.jsx';
+import PredictionDisplay from '../components/PredictionDisplay.jsx';
+import CameraCapture from '../components/CameraCapture.jsx';
+import { predictDigit } from '../services/api.js';
+import { resizeImageToMnistFormat, fileToDataUrl } from '../utils/imageProcessing.js';
 import { PenLine, Upload, Github, Camera, Home } from 'lucide-react';
 import { toast } from 'sonner';
 

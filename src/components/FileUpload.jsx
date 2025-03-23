@@ -1,95 +1,99 @@
 
-import React, { useState } from 'react';
-import { Upload, Image as ImageIcon } from 'lucide-react';
+import React, { useRef } from 'react';
+import { Upload, X, ArrowRight } from 'lucide-react';
+import { Button } from "@/components/ui/button";
 
 const FileUpload = ({ onImageSelect, selectedImage, isProcessing, onPredict }) => {
-  const [isDragging, setIsDragging] = useState(false);
+  const fileInputRef = useRef(null);
 
-  const handleFileDrop = (e) => {
-    e.preventDefault();
-    setIsDragging(false);
-    
-    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      handleFileSelect(e.dataTransfer.files[0]);
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      onImageSelect(file);
     }
   };
 
-  const handleFileSelect = (file) => {
-    if (file.type.match('image.*')) {
+  const handleClick = () => {
+    fileInputRef.current.click();
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    const file = e.dataTransfer.files[0];
+    if (file) {
       onImageSelect(file);
     }
   };
 
   const handleDragOver = (e) => {
     e.preventDefault();
-    setIsDragging(true);
   };
 
-  const handleDragLeave = () => {
-    setIsDragging(false);
+  const handleClear = () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+    onImageSelect({ size: 0 });
   };
 
   return (
-    <div className="w-full flex flex-col items-center">
-      {!selectedImage ? (
-        <div 
-          className={`w-full h-64 border-2 border-dashed rounded-xl flex flex-col items-center justify-center p-6 transition-all duration-300 ${
-            isDragging ? 'border-indigo-500 bg-indigo-50' : 'border-indigo-200'
-          }`}
-          onDrop={handleFileDrop}
-          onDragOver={handleDragOver}
-          onDragLeave={handleDragLeave}
-        >
-          <Upload className="h-10 w-10 text-indigo-500 mb-4" />
-          <p className="text-center text-indigo-600/70 mb-4">
-            Drag & drop an image or browse
-          </p>
-          <label className="px-5 py-2.5 rounded-full bg-gradient-to-r from-indigo-500 to-purple-500 text-white shadow-md hover:shadow-lg transition-all cursor-pointer">
-            Browse Files
-            <input
-              type="file"
-              className="hidden"
-              accept="image/*"
-              onChange={(e) => e.target.files && handleFileSelect(e.target.files[0])}
+    <div className="flex flex-col gap-4">
+      <h2 className="text-xl font-semibold text-indigo-700 mb-2">Upload an Image</h2>
+      <p className="text-gray-600 mb-4">Upload a clear image of a single handwritten digit (0-9)</p>
+      
+      <div 
+        className={`border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition-colors ${selectedImage ? 'border-indigo-300 bg-indigo-50/50' : 'border-gray-300 hover:border-indigo-300 hover:bg-indigo-50/30'}`}
+        onClick={!selectedImage ? handleClick : undefined}
+        onDrop={handleDrop}
+        onDragOver={handleDragOver}
+      >
+        {!selectedImage ? (
+          <div className="flex flex-col items-center">
+            <Upload className="w-12 h-12 text-indigo-500 mb-2" />
+            <p className="text-indigo-600 font-medium">Drop your image here or click to browse</p>
+            <p className="text-gray-500 text-sm mt-1">PNG, JPG, or JPEG</p>
+          </div>
+        ) : (
+          <div className="relative group">
+            <img 
+              src={selectedImage} 
+              alt="Selected digit" 
+              className="mx-auto max-h-64 rounded"
             />
-          </label>
-        </div>
-      ) : (
-        <div className="w-full animate-fade-in">
-          <div className="bg-white/70 rounded-xl p-4 shadow-md mb-4 border border-indigo-100">
-            <div className="relative w-full pt-[100%] rounded-lg overflow-hidden">
-              <img
-                src={selectedImage}
-                alt="Selected"
-                className="absolute inset-0 w-full h-full object-contain"
-              />
-            </div>
-          </div>
-          <div className="flex justify-center gap-3">
-            <button
-              className="px-5 py-2 rounded-full bg-indigo-100 text-indigo-700 shadow hover:shadow-md transition-all flex items-center gap-2"
-              onClick={() => onImageSelect(new File([], ''))}
+            <button 
+              onClick={handleClear}
+              className="absolute top-2 right-2 bg-white/80 text-gray-700 rounded-full p-1 opacity-70 hover:opacity-100 transition-opacity"
             >
-              <ImageIcon className="w-4 h-4" />
-              New Image
-            </button>
-            <button
-              className="px-5 py-2 rounded-full bg-gradient-to-r from-indigo-500 to-purple-500 text-white shadow hover:shadow-md transition-all flex items-center gap-2"
-              onClick={onPredict}
-              disabled={isProcessing}
-            >
-              {isProcessing ? (
-                <div className="flex items-center gap-2">
-                  <div className="h-4 w-4 rounded-full border-2 border-white border-t-transparent animate-spin"></div>
-                  Processing...
-                </div>
-              ) : (
-                'Predict'
-              )}
+              <X className="w-5 h-5" />
             </button>
           </div>
-        </div>
-      )}
+        )}
+        <input 
+          type="file" 
+          ref={fileInputRef} 
+          onChange={handleFileChange} 
+          accept="image/png, image/jpeg, image/jpg"
+          className="hidden" 
+        />
+      </div>
+      
+      <Button 
+        className="self-center mt-4"
+        onClick={onPredict}
+        disabled={!selectedImage || isProcessing}
+      >
+        {isProcessing ? (
+          <span className="flex items-center gap-2">
+            <div className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full" /> 
+            Processing...
+          </span>
+        ) : (
+          <span className="flex items-center gap-2">
+            <span>Predict Digit</span> 
+            <ArrowRight className="w-4 h-4" />
+          </span>
+        )}
+      </Button>
     </div>
   );
 };

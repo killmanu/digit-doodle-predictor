@@ -1,248 +1,232 @@
 
 import React, { useRef, useState, useEffect } from 'react';
-import { Camera, XCircle, Redo } from 'lucide-react';
+import { Camera, X, RotateCcw, Check, ArrowRight } from 'lucide-react';
+import { Button } from "@/components/ui/button";
 import { toast } from 'sonner';
 
 const CameraCapture = ({ onImageCaptured, capturedImage, isProcessing, onPredict }) => {
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
-  const [isCameraActive, setIsCameraActive] = useState(false);
+  const [stream, setStream] = useState(null);
+  const [cameraActive, setCameraActive] = useState(false);
   const [hasPermission, setHasPermission] = useState(null);
-  const [cameraStream, setCameraStream] = useState(null);
-  const [streamError, setStreamError] = useState(null);
-
-  useEffect(() => {
-    // Cleanup function to stop camera stream when component unmounts
-    return () => {
-      stopCamera();
-    };
-  }, []);
-
+  const [error, setError] = useState(null);
+  
+  // Start camera stream
   const startCamera = async () => {
     try {
-      setStreamError(null);
-      
-      // Stop any existing streams first
-      stopCamera();
-      
-      // Try to get the camera stream
-      const stream = await navigator.mediaDevices.getUserMedia({ 
+      setError(null);
+      const mediaStream = await navigator.mediaDevices.getUserMedia({ 
         video: { 
           facingMode: 'environment',
-          width: { ideal: 640 },
-          height: { ideal: 640 }
+          width: { ideal: 1280 },
+          height: { ideal: 720 }
         } 
       });
       
       if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-        videoRef.current.onloadedmetadata = () => {
-          videoRef.current?.play().catch(e => {
-            console.error('Error playing video:', e);
-            setStreamError('Could not play video stream');
-            toast.error('Failed to start video stream');
-          });
-        };
+        videoRef.current.srcObject = mediaStream;
+        setStream(mediaStream);
+        setCameraActive(true);
+        setHasPermission(true);
       }
+    } catch (err) {
+      console.error('Error accessing camera:', err);
       
-      setCameraStream(stream);
-      setIsCameraActive(true);
-      setHasPermission(true);
-      
-      // Clear any previously captured image
-      onImageCaptured('');
-      
-      console.log('Camera started successfully');
-    } catch (error) {
-      console.error('Error accessing camera:', error);
-      setHasPermission(false);
-      
-      // Provide more specific error messages
-      if (error instanceof DOMException) {
-        if (error.name === 'NotAllowedError') {
-          setStreamError('Camera access denied. Please allow camera access in your browser settings.');
-          toast.error('Camera access denied');
-        } else if (error.name === 'NotFoundError') {
-          setStreamError('No camera found on this device.');
-          toast.error('No camera found');
-        } else if (error.name === 'NotReadableError') {
-          setStreamError('Camera is already in use by another application.');
-          toast.error('Camera is in use by another app');
-        } else {
-          setStreamError(`Camera error: ${error.message}`);
-          toast.error('Camera error occurred');
-        }
+      if (err.name === 'NotAllowedError') {
+        setHasPermission(false);
+        toast.error('Camera access denied. Please allow camera access.');
       } else {
-        setStreamError('Failed to access camera');
-        toast.error('Failed to access camera');
+        setError('Could not access the camera');
+        toast.error('Could not access the camera');
       }
     }
   };
-
+  
+  // Stop camera stream
   const stopCamera = () => {
-    if (cameraStream) {
-      cameraStream.getTracks().forEach(track => {
-        track.stop();
-      });
-      setCameraStream(null);
+    if (stream) {
+      stream.getTracks().forEach(track => track.stop());
+      setStream(null);
+      setCameraActive(false);
+      if (videoRef.current) {
+        videoRef.current.srcObject = null;
+      }
     }
-    
-    if (videoRef.current) {
-      videoRef.current.srcObject = null;
-    }
-    
-    setIsCameraActive(false);
   };
-
+  
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      stopCamera();
+    };
+  }, []);
+  
+  // Capture image from camera
   const captureImage = () => {
-    if (!videoRef.current || !canvasRef.current) {
-      toast.error('Failed to capture image');
-      return;
-    }
+    if (!videoRef.current || !canvasRef.current) return;
     
-    const canvas = canvasRef.current;
     const video = videoRef.current;
+    const canvas = canvasRef.current;
     const context = canvas.getContext('2d');
     
-    if (!context) {
-      toast.error('Failed to get canvas context');
-      return;
-    }
+    // Get video dimensions
+    const videoWidth = video.videoWidth;
+    const videoHeight = video.videoHeight;
     
-    try {
-      // Set canvas dimensions to create a square crop from the center
-      const size = Math.min(video.videoWidth, video.videoHeight);
-      canvas.width = size;
-      canvas.height = size;
-      
-      // Calculate the cropping position (center of the video)
-      const x = (video.videoWidth - size) / 2;
-      const y = (video.videoHeight - size) / 2;
-      
-      // Draw the video frame to the canvas, cropping to a square
-      context.drawImage(
-        video, 
-        x, y, size, size,
-        0, 0, size, size
-      );
-      
-      // Get the image data
-      const imageData = canvas.toDataURL('image/png');
-      onImageCaptured(imageData);
-      
-      // Stop the camera after capturing
-      stopCamera();
-      
-      toast.success('Image captured');
-    } catch (error) {
-      console.error('Error capturing image:', error);
-      toast.error('Failed to capture image');
-    }
+    // Use the smaller dimension to make a square
+    const size = Math.min(videoWidth, videoHeight);
+    
+    // Calculate cropping position (center of the video)
+    const xStart = (videoWidth - size) / 2;
+    const yStart = (videoHeight - size) / 2;
+    
+    // Set canvas size to match the square crop
+    canvas.width = canvas.height = size;
+    
+    // Draw the cropped square to the canvas
+    context.drawImage(
+      video,
+      xStart, yStart, size, size,  // Source rectangle
+      0, 0, size, size             // Destination rectangle
+    );
+    
+    // Convert to data URL and send to parent
+    const imageData = canvas.toDataURL('image/png');
+    onImageCaptured(imageData);
+    
+    // Stop the camera
+    stopCamera();
   };
-
-  const retakePhoto = () => {
-    onImageCaptured('');
+  
+  const resetCapture = () => {
+    onImageCaptured(null);
     startCamera();
   };
-
-  // Automatically start camera when component mounts
-  useEffect(() => {
-    if (!capturedImage && !isCameraActive) {
-      startCamera();
-    }
-  }, [capturedImage]);
-
+  
+  const handleRetakeClick = () => {
+    resetCapture();
+  };
+  
   return (
-    <div className="w-full flex flex-col items-center animate-fade-in">
-      <div className="bg-white rounded-xl p-4 shadow-md mb-4 w-full border border-indigo-100">
-        {!capturedImage ? (
-          <div className="relative w-full pt-[100%] rounded-lg overflow-hidden bg-gray-100">
-            {isCameraActive ? (
-              <video
-                ref={videoRef}
-                autoPlay
-                playsInline
-                muted
-                className="absolute inset-0 w-full h-full object-cover"
-              />
+    <div className="flex flex-col gap-4">
+      <h2 className="text-xl font-semibold text-pink-700 mb-2">Capture a Digit</h2>
+      <p className="text-gray-600 mb-4">Take a picture of a handwritten digit (0-9)</p>
+      
+      <div className="rounded-lg overflow-hidden bg-gray-100 border border-gray-300 relative">
+        {/* Camera Display or Captured Image */}
+        {capturedImage ? (
+          <div className="relative">
+            <img 
+              src={capturedImage} 
+              alt="Captured digit" 
+              className="w-full h-auto"
+            />
+            <button 
+              onClick={handleRetakeClick}
+              className="absolute top-3 right-3 bg-white/80 text-gray-700 rounded-full p-1.5 opacity-80 hover:opacity-100 transition-opacity"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+        ) : (
+          <>
+            {cameraActive ? (
+              <div className="relative aspect-square">
+                <video 
+                  ref={videoRef} 
+                  autoPlay 
+                  playsInline 
+                  className="absolute inset-0 w-full h-full object-cover"
+                />
+                <div className="absolute inset-0 border-4 border-white/70 pointer-events-none"></div>
+              </div>
             ) : (
-              <div className="absolute inset-0 flex flex-col items-center justify-center gap-4">
-                {hasPermission === false ? (
-                  <div className="text-center p-4">
-                    <p className="text-red-500 mb-2">Camera access issue</p>
-                    <p className="text-gray-600 text-sm">{streamError || 'Please allow camera access in your browser settings and try again.'}</p>
+              <div className="aspect-square flex flex-col items-center justify-center p-4">
+                {error ? (
+                  <div className="text-center">
+                    <div className="bg-red-100 text-red-500 rounded-full w-16 h-16 mx-auto flex items-center justify-center mb-3">
+                      <Camera className="w-8 h-8" />
+                    </div>
+                    <p className="text-red-500 font-medium">{error}</p>
                     <button
-                      className="mt-4 px-4 py-2 bg-pink-500 text-white rounded-full hover:bg-pink-600 transition-colors"
                       onClick={startCamera}
+                      className="mt-4 text-pink-600 hover:text-pink-700 underline text-sm"
                     >
-                      Try Again
+                      Try again
+                    </button>
+                  </div>
+                ) : hasPermission === false ? (
+                  <div className="text-center">
+                    <div className="bg-orange-100 text-orange-500 rounded-full w-16 h-16 mx-auto flex items-center justify-center mb-3">
+                      <Camera className="w-8 h-8" />
+                    </div>
+                    <p className="text-gray-700 font-medium">Camera permission denied</p>
+                    <p className="text-gray-500 text-sm mt-1 mb-3">
+                      Please enable camera access in your browser settings
+                    </p>
+                    <button
+                      onClick={startCamera}
+                      className="text-pink-600 hover:text-pink-700 underline text-sm"
+                    >
+                      Try again
                     </button>
                   </div>
                 ) : (
-                  <>
-                    <Camera className="w-16 h-16 text-pink-400" />
-                    <p className="text-gray-500">Loading camera...</p>
-                    <button
-                      className="px-5 py-2.5 rounded-full bg-gradient-to-r from-pink-500 to-purple-500 text-white shadow-md hover:shadow-lg transition-all cursor-pointer"
-                      onClick={startCamera}
-                    >
-                      Start Camera
-                    </button>
-                  </>
+                  <button
+                    onClick={startCamera}
+                    className="bg-pink-100 text-pink-600 hover:bg-pink-200 transition-colors rounded-full w-20 h-20 flex items-center justify-center"
+                  >
+                    <Camera className="w-10 h-10" />
+                  </button>
                 )}
               </div>
             )}
-          </div>
-        ) : (
-          <div className="relative w-full pt-[100%] rounded-lg overflow-hidden">
-            <img
-              src={capturedImage}
-              alt="Captured"
-              className="absolute inset-0 w-full h-full object-contain"
-            />
-          </div>
+          </>
         )}
         
-        {/* Hidden canvas for image processing */}
-        <canvas ref={canvasRef} className="hidden" />
+        {/* Hidden canvas for capturing images */}
+        <canvas ref={canvasRef} style={{ display: 'none' }} />
       </div>
       
-      <div className="flex justify-center gap-3">
-        {isCameraActive ? (
-          <button
-            className="px-5 py-2 rounded-full bg-pink-500 text-white shadow hover:shadow-md transition-all flex items-center gap-2"
-            onClick={captureImage}
-            disabled={isProcessing}
-          >
-            <Camera className="w-4 h-4" />
-            Capture
-          </button>
-        ) : capturedImage ? (
+      <div className="flex justify-center gap-3 mt-2">
+        {capturedImage ? (
           <>
-            <button
-              className="px-5 py-2 rounded-full bg-indigo-100 text-indigo-700 shadow hover:shadow-md transition-all flex items-center gap-2"
-              onClick={retakePhoto}
-              disabled={isProcessing}
+            <Button
+              variant="outline"
+              onClick={handleRetakeClick}
+              className="flex items-center gap-2"
             >
-              <Redo className="w-4 h-4" />
-              Retake
-            </button>
-            <button
-              className="px-5 py-2 rounded-full bg-gradient-to-r from-indigo-500 to-purple-500 text-white shadow hover:shadow-md transition-all flex items-center gap-2"
+              <RotateCcw className="w-4 h-4" />
+              <span>Retake</span>
+            </Button>
+            
+            <Button
               onClick={onPredict}
               disabled={isProcessing}
             >
               {isProcessing ? (
-                <div className="flex items-center gap-2">
-                  <div className="h-4 w-4 rounded-full border-2 border-white border-t-transparent animate-spin"></div>
+                <span className="flex items-center gap-2">
+                  <div className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full" /> 
                   Processing...
-                </div>
+                </span>
               ) : (
-                'Predict'
+                <span className="flex items-center gap-2">
+                  <span>Predict Digit</span> 
+                  <ArrowRight className="w-4 h-4" />
+                </span>
               )}
-            </button>
+            </Button>
           </>
-        ) : null}
+        ) : cameraActive && (
+          <Button
+            onClick={captureImage}
+            className="flex items-center gap-2"
+          >
+            <Check className="w-4 h-4" />
+            <span>Capture</span>
+          </Button>
+        )}
       </div>
     </div>
   );

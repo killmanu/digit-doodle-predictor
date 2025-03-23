@@ -1,23 +1,32 @@
 
-// This service will handle communication with the backend API for digit predictions
+// API service for digit prediction
 
-// For demonstration, this function simulates a prediction 
-// In a real app, this would make a fetch call to your backend
+// Mock API call for digit prediction
 export const predictDigit = async (imageData) => {
-  console.log('Sending image for prediction');
-  
-  // Simulate API call delay
+  // Simulate API latency
   await new Promise(resolve => setTimeout(resolve, 1500));
   
-  // Mock response - in a real app, this would be the response from your backend
-  // Random digit between 0-9 with random confidence for demo purposes
-  const mockPrediction = Math.floor(Math.random() * 10);
-  const mockConfidence = 0.7 + (Math.random() * 0.3); // Between 0.7 and 1.0
+  // In a real application, send the image to your backend
+  // const response = await fetch('/api/predict', {
+  //   method: 'POST',
+  //   headers: {
+  //     'Content-Type': 'application/json',
+  //   },
+  //   body: JSON.stringify({ image: imageData }),
+  // });
+  // 
+  // if (!response.ok) {
+  //   throw new Error('Failed to predict digit');
+  // }
+  // 
+  // return await response.json();
   
-  console.log(`Predicted: ${mockPrediction} with confidence ${mockConfidence}`);
+  // For this demo, we'll return a random digit and confidence
+  const randomDigit = Math.floor(Math.random() * 10);
+  const randomConfidence = 0.7 + Math.random() * 0.3; // Random value between 0.7 and 1.0
   
   return {
-    prediction: mockPrediction,
-    confidence: mockConfidence
+    prediction: randomDigit,
+    confidence: randomConfidence,
   };
 };

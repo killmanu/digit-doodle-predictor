@@ -151,6 +151,14 @@ const CameraCapture = ({ onImageCaptured, capturedImage, isProcessing, onPredict
     resetCapture();
   };
   
+  const handlePredictClick = () => {
+    if (onPredict && typeof onPredict === 'function') {
+      onPredict();
+    } else {
+      console.error('onPredict is not a function or not provided');
+    }
+  };
+  
   return (
     <div className="flex flex-col gap-4">
       <h2 className="text-xl font-semibold text-pink-700 mb-2">Capture a Digit</h2>
@@ -247,7 +255,7 @@ const CameraCapture = ({ onImageCaptured, capturedImage, isProcessing, onPredict
             </Button>
             
             <Button
-              onClick={onPredict}
+              onClick={handlePredictClick}
               disabled={isProcessing}
               className="flex items-center gap-2"
             >

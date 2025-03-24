@@ -2,10 +2,22 @@
 import React, { useState } from 'react';
 import { Upload, Image as ImageIcon } from 'lucide-react';
 
-const FileUpload = ({ onImageSelect, selectedImage, isProcessing, onPredict }) => {
+interface FileUploadProps {
+  onImageSelect: (imageFile: File) => void;
+  selectedImage: string | null;
+  isProcessing: boolean;
+  onPredict: () => void;
+}
+
+const FileUpload: React.FC<FileUploadProps> = ({ 
+  onImageSelect, 
+  selectedImage, 
+  isProcessing,
+  onPredict 
+}) => {
   const [isDragging, setIsDragging] = useState(false);
 
-  const handleFileDrop = (e) => {
+  const handleFileDrop = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     setIsDragging(false);
     
@@ -14,13 +26,13 @@ const FileUpload = ({ onImageSelect, selectedImage, isProcessing, onPredict }) =
     }
   };
 
-  const handleFileSelect = (file) => {
+  const handleFileSelect = (file: File) => {
     if (file.type.match('image.*')) {
       onImageSelect(file);
     }
   };
 
-  const handleDragOver = (e) => {
+  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     setIsDragging(true);
   };

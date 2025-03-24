@@ -2,7 +2,17 @@
 import React from 'react';
 import { Brain, AlertCircle } from 'lucide-react';
 
-const PredictionDisplay = ({ prediction, confidence, isProcessing }) => {
+interface PredictionDisplayProps {
+  prediction: number | null;
+  confidence?: number;
+  isProcessing: boolean;
+}
+
+const PredictionDisplay: React.FC<PredictionDisplayProps> = ({ 
+  prediction, 
+  confidence, 
+  isProcessing 
+}) => {
   return (
     <div className="w-full flex flex-col items-center">
       <div className="w-full h-full min-h-[280px] flex flex-col items-center justify-center">

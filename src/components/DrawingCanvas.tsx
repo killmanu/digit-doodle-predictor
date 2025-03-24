@@ -1,9 +1,19 @@
 
 import React, { useRef, useState, useEffect } from 'react';
-import { PenLine, Trash2 } from 'lucide-react';
+import { PenLine, Trash2, RotateCcw } from 'lucide-react';
 
-const DrawingCanvas = ({ onImageGenerated, isProcessing, onPredict }) => {
-  const canvasRef = useRef(null);
+interface DrawingCanvasProps {
+  onImageGenerated: (imageData: string) => void;
+  isProcessing: boolean;
+  onPredict: () => void;
+}
+
+const DrawingCanvas: React.FC<DrawingCanvasProps> = ({ 
+  onImageGenerated, 
+  isProcessing,
+  onPredict 
+}) => {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
   const [isDrawing, setIsDrawing] = useState(false);
   const [hasDrawn, setHasDrawn] = useState(false);
 
@@ -22,7 +32,7 @@ const DrawingCanvas = ({ onImageGenerated, isProcessing, onPredict }) => {
     }
   }, []);
 
-  const startDrawing = (e) => {
+  const startDrawing = (e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     
@@ -35,7 +45,7 @@ const DrawingCanvas = ({ onImageGenerated, isProcessing, onPredict }) => {
     context.beginPath();
     
     // Get coordinates
-    let clientX, clientY;
+    let clientX: number, clientY: number;
     
     if ('touches' in e) {
       // Touch event
@@ -54,7 +64,7 @@ const DrawingCanvas = ({ onImageGenerated, isProcessing, onPredict }) => {
     context.moveTo(x, y);
   };
 
-  const draw = (e) => {
+  const draw = (e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) => {
     if (!isDrawing) return;
     
     const canvas = canvasRef.current;
@@ -64,7 +74,7 @@ const DrawingCanvas = ({ onImageGenerated, isProcessing, onPredict }) => {
     if (!context) return;
     
     // Get coordinates
-    let clientX, clientY;
+    let clientX: number, clientY: number;
     
     if ('touches' in e) {
       // Touch event
@@ -109,6 +119,12 @@ const DrawingCanvas = ({ onImageGenerated, isProcessing, onPredict }) => {
         onImageGenerated('');
       }
     }
+  };
+
+  const undoLastStroke = () => {
+    // This is a simplified undo that just clears the canvas
+    // For a proper undo, you would need to track each stroke
+    clearCanvas();
   };
 
   return (
